@@ -1,0 +1,10 @@
+{
+  "appName": {
+    "message": "linkquery212",
+    "description": "The name of the application"
+  },
+  "appDescription": {
+    "message": "queries a link and gets specific information while displaying them",
+    "description": "The description of the application"
+  }
+}
