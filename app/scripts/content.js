@@ -33,6 +33,14 @@ var extractor = function (url) {
 
 };
 
+//    ____          __  __                        __  __
+//   / __ \        |  \/  |                      |  \/  |
+//  | |  | |_ __   | \  / | ___  _   _ ___  ___  | \  / | _____   _____
+//  | |  | | '_ \  | |\/| |/ _ \| | | / __|/ _ \ | |\/| |/ _ \ \ / / _ \
+//  | |__| | | | | | |  | | (_) | |_| \__ \  __/ | |  | | (_) \ V /  __/
+//   \____/|_| |_| |_|  |_|\___/ \__,_|___/\___| |_|  |_|\___/ \_/ \___|
+//
+//
 extractor.prototype.on_mousemove = function (scope) {
   return function (e) {
     var that = scope;
@@ -72,6 +80,14 @@ extractor.prototype.message_loop = function (msg, sender, sendResponse) {
   sendResponse();
 };
 
+//             _                  _   _____        _         ____  _     _           _
+//            | |                | | |  __ \      | |       / __ \| |   (_)         | |
+//    _____  __ |_ _ __ __ _  ___| |_| |  | | __ _| |_ __ _| |  | | |__  _  ___  ___| |_
+//   / _ \ \/ / __| '__/ _` |/ __| __| |  | |/ _` | __/ _` | |  | | '_ \| |/ _ \/ __| __|
+//  |  __/>  <| |_| | | (_| | (__| |_| |__| | (_| | |_ (_| | |__| | |_) | |  __/ (__| |_
+//   \___/_/\_\\__|_|  \__,_|\___|\__|_____/ \__,_|\__\__,_|\____/|_.__/| |\___|\___|\__|
+//                                                                     _/ |
+//                                                                    |__/
 
 /**
  * the result object contains two static fields ('valid') and ('title') and a bunch
@@ -102,12 +118,22 @@ extractor.prototype.extractData = function (content, api) {
   var result = this.extractDataObject(jq);
   api.set('content.title', result.title);
   if (result.valid) {
-    api.set('content.text', "testing..." + result["number of videos: "]);
+    api.set('content.text', result["number of videos: "]);
   }
   else {
     api.set('content.text', 'The desired information does not exists on this page.');
   }
 };
+
+
+//   _____        __  __                      _____
+//  |  __ \      |  \/  |                    |_   _|
+//  | |  | | ___ | \  / | ___  _   _ ___  ___  | |  _ __
+//  | |  | |/ _ \| |\/| |/ _ \| | | / __|/ _ \ | | | '_ \
+//  | |__| | (_) | |  | | (_) | |_| \__ \  __/_| |_| | | |
+//  |_____/ \___/|_|  |_|\___/ \__,_|___/\___|_____|_| |_|
+//
+//
 
 /**
  *
@@ -169,6 +195,16 @@ extractor.prototype.doMouseIn = function (anchor, href) {
   this.prevAnchor = anchor;
 };
 
+
+//       _       __  __                       ____        _
+//      | |     |  \/  |                     / __ \      | |
+//    __| | ___ | \  / | ___  _   _ ___  ___| |  | |_   _| |_
+//   / _` |/ _ \| |\/| |/ _ \| | | / __|/ _ \ |  | | | | | __|
+//  | (_| | (_) | |  | | (_) | |_| \__ \  __/ |__| | |_| | |_
+//   \__,_|\___/|_|  |_|\___/ \__,_|___/\___|\____/ \__,_|\__|
+//
+
+
 extractor.prototype.doMouseOut = function () {
   if (!this.mouseIn) return;
 
@@ -181,6 +217,15 @@ extractor.prototype.doMouseOut = function () {
   this.prevHRef = null;
   this.mouseIn = false;
 };
+
+//    __ _           _                     _                ______ _                           _
+//   / _(_)         | |   /\              | |              |  ____| |                         | |
+//  | |_ _ _ __   __| |  /  \   _ __   ___| |__   ___  _ __| |__  | | ___ _ __ ___   ___ _ __ | |_
+//  |  _| | '_ \ / _` | / /\ \ | '_ \ / __| '_ \ / _ \| '__|  __| | |/ _ \ '_ ` _ \ / _ \ '_ \| __|
+//  | | | | | | | (_| |/ ____ \| | | | (__| | | | (_) | |  | |____| |  __/ | | | | |  __/ | | | |_
+//  |_| |_|_| |_|\__,_/_/    \_\_| |_|\___|_| |_|\___/|_|  |______|_|\___|_| |_| |_|\___|_| |_|\__|
+//
+//
 
 /**
  * Finds and returns the anchor element related to the srcElement
