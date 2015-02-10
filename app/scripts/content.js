@@ -5,10 +5,19 @@
 
 var _current_url = document.URL;
 
-var extractor = function (url) {
-  this.doc_url = url;
+var extractor = function (url, sites) {
 
-  if (!url.startsWith('https://vk.com')) {
+  this.doc_url = url;
+  this.site = null;
+  var that = this;
+  sites.profiles.forEach(function (site) {
+    if (that.site == null && url.startsWith(site.base_url)) {
+      that.site = site;
+      console.warn("LinkQuery: using [" + site.siteName + "] profile");
+    }
+  });
+
+  if (!this.site) {
     return;
   }
 
@@ -24,13 +33,10 @@ var extractor = function (url) {
 
   chrome.runtime.onMessage.addListener(this.message_loop);
   addEventListener('load', function () {
-    console.log("REZA");
-    console.warn(document.URL);
+    console.log("LinkQuery: " + document.URL + " Loaded.");
   });
 
-  //todo: add the above section to the hover only for anchor elements
   addEventListener('mousemove', this.on_mousemove(this), false);
-
 };
 
 //    ____          __  __                        __  __
@@ -45,16 +51,27 @@ extractor.prototype.on_mousemove = function (scope) {
   return function (e) {
     var that = scope;
     var srcElement = e.srcElement;
-    //console.log(srcElement, "*", prevDOM);
+    var anchor = null, siteRule = null;
+
+    // hitTest all siteRules for current profile
     if (that.prevDOM == null || !srcElement.isSameNode(that.prevDOM)) {
-      var anchor = extractor.findAnchorElement(srcElement);
+      for (var i = 0; i < that.site.rules.length; i++) {
+        var rule = that.site.rules[i];
+        anchor = extractor.findAnchorElement(srcElement, rule);
+        if (anchor != null) {
+          siteRule = rule;
+          break;
+        }
+      }
+
       if (anchor != null) {
         var hRef = anchor.attr('href');
         // Mouse In
         if (that.prevHRef != hRef) {
+          console.log("Using rule [" + siteRule.ruleName + "]");
           //console.log(srcElement, "*", prevDOM);
           that.doMouseOut();
-          that.doMouseIn(anchor, hRef);
+          that.doMouseIn(anchor, hRef, siteRule);
         }
         // Mouse Out
       }
@@ -96,14 +113,30 @@ extractor.prototype.message_loop = function (msg, sender, sendResponse) {
  * @param ajaxPage
  * @returns {*}
  */
-extractor.prototype.extractDataObject = function (ajaxPage) {
+extractor.prototype.extractDataObject = function (ajaxPage, siteRule) {
   var result = {};
+  result.content = "";
   result.title = ajaxPage.filter('title').text();
-  var vids = ajaxPage.find('#profile_videos a .p_header_bottom');
-  result.valid = vids.length;
+  result.valid = false;
 
-  if (!result.valid) return result;
-  result["number of videos: "] = vids.length != 0 ? vids.text() : '';
+  for (var key in siteRule.ruleData) {
+    var val = siteRule.ruleData[key];
+    var res = ajaxPage.find(val[0]);
+    if (res.length > 0) {
+      result.valid = true;
+      var out = "";
+      switch (val[1]) {
+        case "text":
+          out = res.text();
+          break;
+        case "bool":
+          out = val[2];
+          break;
+      }
+      result.content = result.content + key + " : " + out + "<br>";
+    }
+  }
+
   return result;
 };
 
@@ -113,12 +146,12 @@ extractor.prototype.extractDataObject = function (ajaxPage) {
  * @param content   the html content of the new page
  * @param api       tooltip api use it like api.set('content.text','custom status');
  */
-extractor.prototype.extractData = function (content, api) {
+extractor.prototype.extractData = function (content, api, siteRule) {
   var jq = $($.parseHTML(content));
-  var result = this.extractDataObject(jq);
+  var result = this.extractDataObject(jq, siteRule);
   api.set('content.title', result.title);
   if (result.valid) {
-    api.set('content.text', result["number of videos: "]);
+    api.set('content.text', result.content);
   }
   else {
     api.set('content.text', 'The desired information does not exists on this page.');
@@ -140,37 +173,19 @@ extractor.prototype.extractData = function (content, api) {
  * @param anchor    An anchor jQuery element
  * @param href      The hyperlink
  */
-extractor.prototype.doMouseIn = function (anchor, href) {
+extractor.prototype.doMouseIn = function (anchor, href, siteRule) {
   var that = this;
   this.mouseIn = true;
-  //anchor.addClass(this.MOUSE_VISITED_CLASSNAME);
-  //popUpTimeout = setTimeout(function () {
-  //  //console.log(href);
-  //  anchor.css("background-color", "rgba(255, 255, 44, 0.3)");
-  //
-  //  var popup = $('#gdx-bubble-main');
-  //  popup.css("display", "none");
-  //  console.log(popup);
-  //  $.get(href, function (data) {
-  //    var jq = $($.parseHTML(data));
-  //    //$('h1 span').text()
-  //    var res = jq.find('#profile_videos a .p_header_bottom');
-  //    console.log(href + " : " + res.text());
-  //  });
-  //}, 1000);
   this.popUpTimeout = setTimeout(function () {
-    //anchor.css("background-color", "rgba(255, 255, 44, 0.3)");
     href = anchor.attr('href');
     anchor.qtip({
       overwrite: false,
       content: function (event, api) {
-        // Remove protocol from the entry (if exists) to avoid mixed content blocking
-        // href = href.replace(/.*?:\/\//g, "");
         $.ajax({
           url: href, // Use href to fetch new page
           cache: true
         }).then(function (content) {
-          that.extractData(content, api);
+          that.extractData(content, api, siteRule);
         }, function (xhr, status, error) {
           // Upon failure... set the tooltip content to the status and error value
           api.set('content.text', status + ': ' + error);
@@ -178,9 +193,7 @@ extractor.prototype.doMouseIn = function (anchor, href) {
         return 'Loading...';
       },
       show: {
-        delay: 1000,
-        solo: false,
-        hide: false
+        delay: 1000
       },
       style: {
         classes: 'qtip-shadow qtip-rounded qtip-dark'
@@ -192,7 +205,7 @@ extractor.prototype.doMouseIn = function (anchor, href) {
   }, 500);
 
   this.prevHRef = href;
-  this.prevAnchor = anchor;
+  // this.prevAnchor = anchor;
 };
 
 
@@ -210,10 +223,10 @@ extractor.prototype.doMouseOut = function () {
 
   clearTimeout(this.popUpTimeout);
   //console.log("****** Mouse Out *******");
-  if (this.prevAnchor != null) {
-    this.prevAnchor.removeClass(this.MOUSE_VISITED_CLASSNAME);
-  }
-  this.prevAnchor = null;
+  //if (this.prevAnchor != null) {
+  //  this.prevAnchor.removeClass(this.MOUSE_VISITED_CLASSNAME);
+  //}
+  // this.prevAnchor = null;
   this.prevHRef = null;
   this.mouseIn = false;
 };
@@ -232,19 +245,20 @@ extractor.prototype.doMouseOut = function () {
  * @param srcElement    the dom element to be analyzed
  * @returns {*}         an anchor jquery object/null
  */
-extractor.findAnchorElement = function (srcElement) {
+extractor.findAnchorElement = function (srcElement, siteRule) {
   var jqueryE = $(srcElement);
   var anchorE = null;
   if (jqueryE.is("a")) {
     anchorE = jqueryE;
   }
-  /* if the current ellement is inside an anchor, find it */
+  /* if the current element is inside an anchor, find it */
   else if (jqueryE.parents("a").length == 1) {
     anchorE = jqueryE.parents("a").first();
   }
-  if (anchorE != null && ( (anchorE.closest('.friends_bigph_wrap, .friends_field, .wk_likes_liker_row.inl_bl, .fl_l.mv_thumb, .reply_image, .post_image').length > 0) || anchorE.hasClass('like_tt_usr') || anchorE.prev().hasClass('fl_r reply_actions_wrap')))
+  if (anchorE != null && (
+    (anchorE.closest(siteRule.closest).length > 0) || anchorE.is(siteRule.hasClass) || anchorE.prev().hasClass(siteRule.prevHasClass)))
     return anchorE;
   return null;
 };
 
-var x = new extractor(_current_url);
+var x = new extractor(_current_url, sites);
