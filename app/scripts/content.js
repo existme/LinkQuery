@@ -66,6 +66,16 @@ extractor.prototype.on_mousemove = function (scope) {
 
       if (anchor != null) {
         var hRef = anchor.attr('href');
+
+        // Replace illegal addresses with base address
+        var matched = false;
+        that.site.replaceUrl.forEach(function (url) {
+          if (!matched && hRef.startsWith(url)) {
+            hRef = hRef.replace(url, that.site.base_url);
+            matched = true;
+          }
+        });
+
         // Mouse In
         if (that.prevHRef != hRef) {
           console.log("Using rule [" + siteRule.ruleName + "]");
@@ -177,7 +187,7 @@ extractor.prototype.doMouseIn = function (anchor, href, siteRule) {
   var that = this;
   this.mouseIn = true;
   this.popUpTimeout = setTimeout(function () {
-    href = anchor.attr('href');
+    //href = anchor.attr('href');
     anchor.qtip({
       overwrite: false,
       content: function (event, api) {
@@ -196,7 +206,7 @@ extractor.prototype.doMouseIn = function (anchor, href, siteRule) {
         delay: 1000
       },
       style: {
-        classes: 'qtip-shadow qtip-rounded qtip-dark'
+        classes: 'qtip-shadow qtip-rounded ' + siteRule.theme
       },
       ready: true
     });

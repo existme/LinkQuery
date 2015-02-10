@@ -11,15 +11,17 @@ var SiteProfile = function (siteName, url) {
   this.rules = new Array();
   this.siteName = siteName;
   this.base_url = url;
+  this.replaceUrl = new Array();
 };
 
 SiteProfile.prototype.addRule = function (siteRule) {
   this.rules.push(siteRule);
 };
 
-var SiteRule = function (siteProfile, ruleName) {
+var SiteRule = function (siteProfile, ruleName, theme) {
   this.ruleName = ruleName;
   this.siteProfile = siteProfile;
+  this.theme = theme;
 };
 
 
@@ -39,9 +41,13 @@ var SiteRule = function (siteProfile, ruleName) {
 //    filter
 var sites = new SiteProfiles();
 var vk_pr = new SiteProfile("VK", "https://vk.com");
-var vk_pr_people = new SiteRule(vk_pr, "People-Rules");
 
-vk_pr_people.closest = ".friends_bigph_wrap, .friends_field, .wk_likes_liker_row.inl_bl, .fl_l.mv_thumb, .reply_image, .post_image, .people_cell";
+vk_pr.replaceUrl.push("http://vkontakte.ru");
+vk_pr.replaceUrl.push("http://vk.com");
+
+var vk_pr_people = new SiteRule(vk_pr, "People-Rules", "qtip-dark");
+
+vk_pr_people.closest = ".feed_friend_image, .feed_friend_name, .explain, .friends_bigph_wrap, .friends_field, .wk_likes_liker_row.inl_bl, .fl_l.mv_thumb, .reply_image, .people_cell";
 vk_pr_people.hasClass = ".like_tt_usr, .fans_fan_ph, .fans_fan_lnk";
 vk_pr_people.prevHasClass = "fl_r reply_actions_wrap ";
 
@@ -49,16 +55,17 @@ vk_pr_people.ruleData = {
   "Number of videos": ["#profile_videos a .p_header_bottom", "text"]
 };
 
-var vk_pr_pages = new SiteRule(vk_pr, "Pages-Rules");
-vk_pr_pages.closest = ".group_name, .fans_idol_name";
-vk_pr_pages.hasClass = "#profile_idols div a, .fans_idol_ph";
+var vk_pr_pages = new SiteRule(vk_pr, "Pages-Rules", "qtip-blue");
+vk_pr_pages.closest = ".video_row_info_author, .group_row_labeled, .group_row_photo, #mv_descr_field, .group_name, .fans_idol_name, .group_share, .mv_info_block.fl_l, .post_image";
+vk_pr_pages.hasClass = "#profile_idols div a, .fans_idol_ph, .author";
 vk_pr_pages.prevHasClass = "REZA";
 
 vk_pr_pages.ruleData = {
   "Profile # of videos": ["#profile_videos a .p_header_bottom", "text"],
   "Page # of videos": ["#group_videos a .p_header_bottom, #public_videos a .p_header_bottom", "text"],
   "Status": ["#subscribe:not(.unshown)", "bool", "subscribe to this page"],
-  "Private community": [".group_like_enter_desc", "text"]
+  "Private community": [".group_like_enter_desc", "text"],
+  "Summary": [".summary_tab3", "text"]
 };
 
 vk_pr.addRule(vk_pr_people);
