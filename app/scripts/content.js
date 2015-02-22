@@ -1,5 +1,6 @@
 /**
  * Created by Reza on 2/2/2015.
+ * TODO: check for other problems
  */
 'use strict';
 
@@ -11,7 +12,7 @@ var extractor = function (url, sites) {
   this.site = null;
   var that = this;
   sites.profiles.forEach(function (site) {
-    if (that.site == null && url.startsWith(site.base_url)) {
+    if (that.site === null && url.startsWith(site.base_url)) {
       that.site = site;
       console.warn("LinkQuery: using [" + site.siteName + "] profile");
     }
@@ -121,6 +122,7 @@ extractor.prototype.message_loop = function (msg, sender, sendResponse) {
  * of dynamic fields which are constructed based on the context.
  *
  * @param ajaxPage
+ * @param siteRule
  * @returns {*}
  */
 extractor.prototype.extractDataObject = function (ajaxPage, siteRule) {
@@ -154,6 +156,7 @@ extractor.prototype.extractDataObject = function (ajaxPage, siteRule) {
  * This function will extract information from retrieved html based on the url of the page.
  *
  * @param content   the html content of the new page
+ * @param siteRule
  * @param api       tooltip api use it like api.set('content.text','custom status');
  */
 extractor.prototype.extractData = function (content, api, siteRule) {
@@ -181,6 +184,7 @@ extractor.prototype.extractData = function (content, api, siteRule) {
 /**
  *
  * @param anchor    An anchor jQuery element
+ * @param siteRule
  * @param href      The hyperlink
  */
 extractor.prototype.doMouseIn = function (anchor, href, siteRule) {
@@ -253,6 +257,7 @@ extractor.prototype.doMouseOut = function () {
 /**
  * Finds and returns the anchor element related to the srcElement
  * @param srcElement    the dom element to be analyzed
+ * @param siteRule
  * @returns {*}         an anchor jquery object/null
  */
 extractor.findAnchorElement = function (srcElement, siteRule) {

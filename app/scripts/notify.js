@@ -17,7 +17,31 @@ var asURLs = [
   "/images/oceania-400x400.png",
   "/images/south-america-400x400.png"
 ];
+function creationCallback(notID) {
+  'use strict';
+  console.log("Succesfully created " + notID + " notification");
+  setTimeout(function () {
+    chrome.notifications.clear(notID, function (wasCleared) {
+      console.log("Notification " + notID + " cleared: " + wasCleared);
+    });
+  }, 3000);
+}
 
+// Event handlers for the various notification events
+function notificationClosed(notID, bByUser) {
+  'use strict';
+  console.log("The notification '" + notID + "' was closed" + (bByUser ? " by the user" : ""));
+}
+
+function notificationClicked(notID) {
+  'use strict';
+  console.log("The notification '" + notID + "' was clicked");
+}
+
+function notificationBtnClick(notID, iBtn) {
+  'use strict';
+  console.log("The notification '" + notID + "' had button " + iBtn + " clicked");
+}
 // List of sample notifications. These are further customized
 // in the code according the UI settings.
 var notOptions = [
@@ -56,6 +80,7 @@ var notOptions = [
 
 // Window initialization code. Set up the various event handlers
 window.addEventListener("load", function () {
+  'use strict';
   //document.getElementById("basic").addEventListener("click", doNotify);
   //document.getElementById("image").addEventListener("click", doNotify);
   //document.getElementById("list").addEventListener("click", doNotify);
@@ -69,22 +94,20 @@ window.addEventListener("load", function () {
 
 // Create the notification with the given parameters as they are set in the UI
 function doNotify(evt, str) {
-  var path = chrome.runtime.getURL(asURLs[1]);
-  var options = null;
-  var sBtn1 = "ok";
-  var sBtn2 = "cancel";
+  'use strict';
+  var path = chrome.runtime.getURL(asURLs[1]),
+    options = null,
+    sBtn1 = "ok",
+    sBtn2 = "cancel";
   // Create the right notification for the selected type2
-  if (evt == "basic") {
+  if (evt === "basic") {
     options = notOptions[0];
-  }
-  else if (evt == "image") {
+  } else if (evt === "image") {
     options = notOptions[1];
     options.imageUrl = chrome.runtime.getURL("/images/tahoe-320x215.png");
-  }
-  else if (evt == "list") {
+  } else if (evt === "list") {
     options = notOptions[2];
-  }
-  else if (evt == "progress") {
+  } else if (evt === "progress") {
     options = notOptions[3];
   }
 
@@ -96,33 +119,11 @@ function doNotify(evt, str) {
   options.priority = 2;
 
   options.buttons = [];
-  if (sBtn1.length)
+  if (sBtn1.length) {
     options.buttons.push({title: sBtn1});
-  if (sBtn2.length)
-    options.buttons.push({title: sBtn2});
-  chrome.notifications.create("id" + notID++, options, creationCallback);
-}
-
-function creationCallback(notID) {
-  console.log("Succesfully created " + notID + " notification");
-  if (true) {
-    setTimeout(function () {
-      chrome.notifications.clear(notID, function (wasCleared) {
-        console.log("Notification " + notID + " cleared: " + wasCleared);
-      });
-    }, 3000);
   }
-}
-
-// Event handlers for the various notification events
-function notificationClosed(notID, bByUser) {
-  console.log("The notification '" + notID + "' was closed" + (bByUser ? " by the user" : ""));
-}
-
-function notificationClicked(notID) {
-  console.log("The notification '" + notID + "' was clicked");
-}
-
-function notificationBtnClick(notID, iBtn) {
-  console.log("The notification '" + notID + "' had button " + iBtn + " clicked");
+  if (sBtn2.length) {
+    options.buttons.push({title: sBtn2});
+  }
+  chrome.notifications.create("id" + notID++, options, creationCallback);
 }

@@ -1,17 +1,20 @@
 /**
  * Created by Reza on 2/9/2015.
  */
+// TODO : Add another site config here
+'use strict';
+
 var SiteProfiles = function () {
-  this.profiles = new Array();
-}
+  this.profiles = [];
+};
 SiteProfiles.prototype.addSite = function (siteProfile) {
   this.profiles.push(siteProfile);
-}
+};
 var SiteProfile = function (siteName, url) {
-  this.rules = new Array();
+  this.rules = [];
   this.siteName = siteName;
   this.base_url = url;
-  this.replaceUrl = new Array();
+  this.replaceUrl = [];
 };
 
 SiteProfile.prototype.addRule = function (siteRule) {
