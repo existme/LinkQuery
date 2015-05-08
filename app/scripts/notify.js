@@ -2,128 +2,89 @@
  * Created by Reza on 2/1/2015.
  */
 // Declare a variable to generate unique notification IDs
-var notID = 0;
+var notID = null;
+var bgPage = chrome.extension.getBackgroundPage();
+var ignoreNotificationClicks = false;
+//bgPage.$window.open();
 
 // partial URLs to the images used in the example
 var asURLs = [
-  "/images/inbox-64x64.png",
-  "/images/inbox-08-64x64.png",
-  "/images/white-64x64.png",
-  "/images/africa-400x400.png",
-  "/images/antartica-400x400.png",
-  "/images/asia-400x400.png",
-  "/images/europe-400x400.png",
-  "/images/north-america-400x400.png",
-  "/images/oceania-400x400.png",
-  "/images/south-america-400x400.png"
+    "/images/niceAnimatedTriangles.gif",
+    "/images/Preloader_3_128.gif"
 ];
+
 function creationCallback(notID) {
-  'use strict';
-  console.log("Succesfully created " + notID + " notification");
-  setTimeout(function () {
-    chrome.notifications.clear(notID, function (wasCleared) {
-      console.log("Notification " + notID + " cleared: " + wasCleared);
-    });
-  }, 3000);
+    setTimeout(function () {
+        chrome.notifications.clear(notID, function (wasCleared) {
+            return false;
+        });
+    }, 40000);
+
+
 }
 
 // Event handlers for the various notification events
 function notificationClosed(notID, bByUser) {
-  'use strict';
-  console.log("The notification '" + notID + "' was closed" + (bByUser ? " by the user" : ""));
+    //notificationBtnClick(null, null);
 }
 
+function log(msg) {
+    bgPage.console.log(msg);
+    console.log(msg);
+}
 function notificationClicked(notID) {
-  'use strict';
-  console.log("The notification '" + notID + "' was clicked");
+    log("The notification '" + notID + "' was clicked");
 }
 
 function notificationBtnClick(notID, iBtn) {
-  'use strict';
-  console.log("The notification '" + notID + "' had button " + iBtn + " clicked");
+    alert("closed");
+    if (!ignoreNotificationClicks) {
+        log("Terminating...");
+        for (var i = 0; i < timeouts.length; i++) {
+            clearTimeout(timeouts[i]);
+        }
+        timeouts = [];
+        log("Batch Process Terminated");
+    }
+    ignoreNotificationClicks = true;
+    setTimeout(function () {
+        ignoreNotificationClicks = false
+    }, 500);
+    alert("terminated");
 }
+
 // List of sample notifications. These are further customized
 // in the code according the UI settings.
 var notOptions = [
-  {
-    type: "basic",
-    title: "Basic Notification",
-    message: "Short message part",
-    expandedMessage: "Longer part of the message"
-  },
-  {
-    type: "image",
-    title: "Image Notification",
-    message: "Short message plus an image"
-  },
-  {
-    type: "list",
-    title: "List Notification",
-    message: "List of items in a message",
-    items: [
-      {title: "Item1", message: "This is item 1"},
-      {title: "Item2", message: "This is item 2"},
-      {title: "Item3", message: "This is item 3"},
-      {title: "Item4", message: "This is item 4"},
-      {title: "Item5", message: "This is item 5"},
-      {title: "Item6", message: "This is item 6"}
-    ]
-  },
-  {
-    type: "progress",
-    title: "Progress Notification",
-    message: "Short message plus an image",
-    progress: 90
-  }
-
+    {
+        type: "progress",
+        title: "Processing...",
+        message: "",
+        progress: 90,
+        priority: 2,
+        iconUrl: chrome.runtime.getURL(asURLs[1]),
+        buttons: [
+            {title: "Hide Notifications"}
+        ]
+    }
 ];
 
 // Window initialization code. Set up the various event handlers
 window.addEventListener("load", function () {
-  'use strict';
-  //document.getElementById("basic").addEventListener("click", doNotify);
-  //document.getElementById("image").addEventListener("click", doNotify);
-  //document.getElementById("list").addEventListener("click", doNotify);
-  //document.getElementById("progress").addEventListener("click", doNotify);
-  //
-  // set up the event listeners
-  chrome.notifications.onClosed.addListener(notificationClosed);
-  chrome.notifications.onClicked.addListener(notificationClicked);
-  chrome.notifications.onButtonClicked.addListener(notificationBtnClick);
+    // set up the event listeners
+    //chrome.notifications.onClosed.addListener(notificationClosed);
+    //chrome.notifications.onClicked.addListener(notificationClicked);
+    chrome.notifications.onButtonClicked.addListener(notificationBtnClick);
 });
 
 // Create the notification with the given parameters as they are set in the UI
-function doNotify(evt, str) {
-  'use strict';
-  var path = chrome.runtime.getURL(asURLs[1]),
-    options = null,
-    sBtn1 = "ok",
-    sBtn2 = "cancel";
-  // Create the right notification for the selected type2
-  if (evt === "basic") {
-    options = notOptions[0];
-  } else if (evt === "image") {
-    options = notOptions[1];
-    options.imageUrl = chrome.runtime.getURL("/images/tahoe-320x215.png");
-  } else if (evt === "list") {
-    options = notOptions[2];
-  } else if (evt === "progress") {
-    options = notOptions[3];
-  }
-
-  options.iconUrl = path;
-  options.title = str;
-  // priority is from -2 to 2. The API makes no guarantee about how notifications are
-  // visually handled by the OS - they simply represent hints that the OS can use to
-  // order or display them however it wishes.
-  options.priority = 2;
-
-  options.buttons = [];
-  if (sBtn1.length) {
-    options.buttons.push({title: sBtn1});
-  }
-  if (sBtn2.length) {
-    options.buttons.push({title: sBtn2});
-  }
-  chrome.notifications.create("id" + notID++, options, creationCallback);
-}
+function doNotify(evt, str, progress) {
+    chrome.storage.sync.get({doNotify: false}, function (e) {
+        if (e.doNotify == true) {
+            var options = notOptions[0];
+            options.progress = progress;
+            options.title = str;
+            chrome.notifications.create("id" + notID, options, creationCallback);
+        }
+    });
+};
