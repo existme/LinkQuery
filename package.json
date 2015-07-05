@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "dependencies": {},
   "devDependencies": {
-    "connect-livereload": "^0.5.2",
+    "connect-livereload": "^0.5.3",
     "grunt": "~0.4.1",
     "grunt-bower-install": "~1.0.0",
     "grunt-chrome-manifest": "~0.2.0",

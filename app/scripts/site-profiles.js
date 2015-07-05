@@ -50,12 +50,15 @@ vk_pr.replaceUrl.push("http://vk.com");
 
 var vk_pr_people = new SiteRule(vk_pr, "People-Rules", "qtip-dark");
 
-vk_pr_people.closest = ".feed_friend_image, .feed_friend_name, .explain, .friends_bigph_wrap, .friends_field, .wk_likes_liker_row.inl_bl, .fl_l.mv_thumb, .reply_image, .people_cell";
+vk_pr_people.closest = ".feed_friend_image, .feed_friend_name, .explain, .friends_bigph_wrap, .friends_field," +
+    " .wk_likes_liker_row.inl_bl, .fl_l.mv_thumb, .reply_image, .people_cell, .name, .mem_link";
 vk_pr_people.hasClass = ".like_tt_usr, .fans_fan_ph, .fans_fan_lnk";
 vk_pr_people.prevHasClass = "fl_r reply_actions_wrap ";
 
 vk_pr_people.ruleData = {
-  "Number of videos": ["#profile_videos a .p_header_bottom", "text"]
+    "Number of videos": ["#profile_videos a .p_header_bottom", "text","color:red"],
+    "Status:": ["#friend_status .profile_frdd_wrap","text","color:yellow"],
+    "fans:":[".fans .fl_r","text","color:blue"]
 };
 
 var vk_pr_pages = new SiteRule(vk_pr, "Pages-Rules", "qtip-blue");

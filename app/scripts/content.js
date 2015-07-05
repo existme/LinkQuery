@@ -238,6 +238,7 @@ extractor.prototype.extractDataObject = function (ajaxPage, siteRule) {
     for (var key in siteRule.ruleData) {
         var val = siteRule.ruleData[key];
         var res = ajaxPage.find(val[0]);
+        var style = val[2];
         if (res.length > 0) {
             result.valid = true;
             var out = "";
@@ -249,7 +250,12 @@ extractor.prototype.extractDataObject = function (ajaxPage, siteRule) {
                     out = val[2];
                     break;
             }
-            result.content = result.content + key + " : " + out + "<br>";
+            if(style) {
+                result.content = result.content + "<span style='"+style+"'>"+key + " : " + out + "</span><br>";
+            }
+            else{
+                result.content = result.content + key + " : " + out + "<br>";
+            }
         }
     }
 
