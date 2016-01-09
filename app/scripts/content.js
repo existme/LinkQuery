@@ -156,7 +156,9 @@ extractor.prototype.message_loop = function (msg, sender, sendResponse) {
         var inc = 0;
 
         var links = new Array;
-        $(".feed_friend_name,.explain,.feed_explain_list,.friends_field,.fans_idol_name").find('a[href]').each(
+        // info:
+        // Start processing elements which has specific classes
+        $(".feed_friend_name,.explain,.feed_explain_list,.friends_field,.fans_idol_name,.people_results").find('a[href]').each(
             function (index) {
                 var anchorElement = this;
                 var findRes = extractorObj.findRuleAndAnchor(extractorObj.site.rules, anchorElement);
@@ -177,7 +179,8 @@ extractor.prototype.message_loop = function (msg, sender, sendResponse) {
 };
 
 /**
- * Fetch and process the link. Set proper information on the element. Show notification about the progress.
+ * Fetch and process the link. Set proper information on the element.
+ * Show notification about the progress.
  *
  * @param extractorObject
  * @param ret

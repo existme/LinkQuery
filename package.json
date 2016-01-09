@@ -3,7 +3,8 @@
   "version": "0.0.0",
   "dependencies": {},
   "devDependencies": {
-    "connect-livereload": "^0.5.3",
+    "connect-livereload": "^0.5.4",
+    "express": "^4.13.3",
     "grunt": "~0.4.1",
     "grunt-bower-install": "~1.0.0",
     "grunt-chrome-manifest": "~0.2.0",
@@ -26,7 +27,7 @@
     "jshint-stylish": "~0.1.5",
     "load-grunt-tasks": "~0.4.0",
     "time-grunt": "~0.3.1",
-    "tiny-lr": "^0.1.5"
+    "tiny-lr": "^0.2.1"
   },
   "engines": {
     "node": ">=0.8.0"

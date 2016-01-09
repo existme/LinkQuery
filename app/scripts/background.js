@@ -71,6 +71,10 @@ chrome.tabs.onUpdated.addListener(function (id, info, tab) {
 
 });
 
+/**
+ * When user clicks on the page LinkQuery icon. The page
+ * Processing starts
+ */
 chrome.pageAction.onClicked.addListener(function (tab) {
     chrome.reza = chrome.reza + 1;
     chrome.tabs.sendMessage(tab.id, {"message": "hide", "id": chrome.reza}, null,
