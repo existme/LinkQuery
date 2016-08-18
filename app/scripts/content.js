@@ -22,6 +22,8 @@ var extractor = function (url, sites) {
     this.getProperties();
     this.doc_url = url;
     this.site = null;
+    this.db = new SiteDb();
+    this.db.createOpenDb();
     var that = this;
     sites.profiles.forEach(function (site) {
         if (that.site === null && url.startsWith(site.base_url)) {
@@ -51,6 +53,7 @@ var extractor = function (url, sites) {
     });
 
     addEventListener('mousemove', this.on_mousemove(this), false);
+
 };
 
 extractor.prototype.getProperties = function () {
@@ -122,6 +125,7 @@ extractor.prototype.on_mousemove = function (scope) {
                 // Mouse In
                 if (that.prevHRef != hRef) {
                     console.log("Using rule [" + siteRule.ruleName + "]");
+
                     //console.log(srcElement, "*", prevDOM);
                     that.doMouseOut();
                     that.doMouseIn(anchor, hRef, siteRule);
@@ -145,7 +149,11 @@ extractor.prototype.on_mousemove = function (scope) {
 extractor.prototype.message_loop = function (msg, sender, sendResponse) {
 
     var extractorObj = this;
+    var that = this;
     //extractorObject.endBatchProcess = 0;
+    if (msg.message == 'initialize') {
+        this.db.addRecord("/test", 12, "12 videos", false);
+    }
     if (msg.message == 'hide') {
         //extractorObj.getProperties();
         chrome.extension.sendMessage({
@@ -168,9 +176,23 @@ extractor.prototype.message_loop = function (msg, sender, sendResponse) {
                 }
             }
         );
+
         var max = links.length;
+        var queueCount = 0;
         for (var index = 0; index < max; index++) {
-            setTimeout(extractorObj.ProcessHTMLLink, index * 3000, extractorObj, links[index].findRes, links[index].anchorElement, index + 1, max);
+            var anchor = links[index].anchorElement;
+            var href = $(anchor).attr('href');
+            var val = this.db.data[href];
+
+            if (val) {
+                showResult(links[index].anchorElement, true, val.txt);
+            }
+            else {
+                console.log(anchor);
+                setTimeout(extractorObj.ProcessHTMLLink, queueCount * 3000, this.db, extractorObj, links[index].findRes, links[index].anchorElement, index + 1, max);
+                queueCount++;
+            }
+
         }
     }
     console.log(msg, sender);
@@ -187,8 +209,10 @@ extractor.prototype.message_loop = function (msg, sender, sendResponse) {
  * @param anchoreElement
  * @constructor
  */
-extractor.prototype.ProcessHTMLLink = function (extractorObject, ret, anchoreElement, progress, max) {
+extractor.prototype.ProcessHTMLLink = function (db, extractorObject, ret, anchoreElement, progress, max) {
     var href = $(anchoreElement).attr('href');
+    var title = $(anchoreElement).text();
+
     $.ajax({
         url: href, // Use href to fetch new page
         cache: true
@@ -200,21 +224,26 @@ extractor.prototype.ProcessHTMLLink = function (extractorObject, ret, anchoreEle
 
         var jq = $($.parseHTML(content));
         var result = extractorObject.extractDataObject(jq, ret.siteRule);
-        console.warn(anchoreElement);
+        //console.warn(anchoreElement);
         if (result.valid) {
-            $(anchoreElement).append("<br><p style='color:red'>" + result.content + "</p>");
-            $(anchoreElement).parents('.fans_idol_row').append("<p style='color:red'>" + result.content + "</p>");
+            db.addRecord(href, result.nValue, result.content, title, false);
         }
-        else {
-            $(anchoreElement).append("<br><p style='color:red'> *na* </p>");
-            $(anchoreElement).parents('.fans_idol_row').append("<p style='color:red'> *na* </p>");
-        }
+        showResult(anchoreElement, result.valid, result.content);
     }, function (xhr, status, error) {
         // Upon failure... set the tooltip content to the status and error value
         console.log("Error");
     });
 }
-
+function showResult(anchoreElement, valid, content) {
+    if (valid) {
+        $(anchoreElement).append("<br><p style='color:red'>" + content + "</p>");
+        $(anchoreElement).parents('.fans_idol_row').append("<p style='color:red'>" + content + "</p>");
+    }
+    else {
+        $(anchoreElement).append("<br><p style='color:red'> *na* </p>");
+        $(anchoreElement).parents('.fans_idol_row').append("<p style='color:red'> *na* </p>");
+    }
+}
 //             _                  _   _____        _         ____  _     _           _
 //            | |                | | |  __ \      | |       / __ \| |   (_)         | |
 //    _____  __ |_ _ __ __ _  ___| |_| |  | | __ _| |_ __ _| |  | | |__  _  ___  ___| |_
@@ -242,23 +271,33 @@ extractor.prototype.extractDataObject = function (ajaxPage, siteRule) {
         var val = siteRule.ruleData[key];
         var res = ajaxPage.find(val[0]);
         var style = val[2];
+        console.log(res);
         if (res.length > 0) {
             result.valid = true;
             var out = "";
             switch (val[1]) {
                 case "text":
+                    //out = res.text();
                     out = res.text();
+                    break;
+                case "href":
+                    console.log(res);
+                    out = res.attr(val[2]);
+                    style = val[3];
                     break;
                 case "bool":
                     out = val[2];
                     break;
             }
-            if(style) {
-                result.content = result.content + "<span style='"+style+"'>"+key + " : " + out + "</span><br>";
+            if (style) {
+                result.content = result.content + "<span style='" + style + "'>" + key + " : " + out + "</span><br>";
             }
-            else{
+            else {
                 result.content = result.content + key + " : " + out + "<br>";
             }
+            result.key = key;
+            result.value = out;
+            result.nValue = this.parsInt(result.content);
         }
     }
 
@@ -275,6 +314,7 @@ extractor.prototype.extractDataObject = function (ajaxPage, siteRule) {
 extractor.prototype.extractData = function (content, api, siteRule) {
     var jq = $($.parseHTML(content));
     var result = this.extractDataObject(jq, siteRule);
+
     api.set('content.title', result.title);
     if (result.valid) {
         api.set('content.text', result.content);
@@ -387,6 +427,13 @@ extractor.findAnchorElement = function (srcElement, siteRule) {
         (anchorE.closest(siteRule.closest).length > 0) || anchorE.is(siteRule.hasClass) || anchorE.prev().hasClass(siteRule.prevHasClass)))
         return anchorE;
     return null;
+};
+
+extractor.prototype.parsInt = function (str) {
+    var matches = str.match(/\d+/);
+    if (matches != null && matches.length > 0)
+        return matches[0];
+    return 0;
 };
 
 var x = new extractor(_current_url, sites);

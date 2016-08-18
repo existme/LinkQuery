@@ -77,6 +77,11 @@ chrome.tabs.onUpdated.addListener(function (id, info, tab) {
  */
 chrome.pageAction.onClicked.addListener(function (tab) {
     chrome.reza = chrome.reza + 1;
+    // chrome.tabs.sendMessage(tab.id, {"message": "initialize", "id": chrome.reza}, null,
+    //     function () {
+    //
+    //     });
+
     chrome.tabs.sendMessage(tab.id, {"message": "hide", "id": chrome.reza}, null,
         function () {
             console.log("response " + chrome.reza.toString());

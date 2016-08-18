@@ -22,7 +22,7 @@ gulp.task('dev', function () {
 
   lr.listen(port);
   gulp.watch(['**/*.{js,css,html,json}'], function (evt) {
-    console.log('Event path: ' + evt.path);
+    console.log('Event path: ' + evt);
     lr.changed({
       body: {
         files: [evt.path]
