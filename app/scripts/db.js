@@ -69,7 +69,7 @@ SiteDb.prototype.dbOpenComplete = function () {
     var that = this;
     this.getAllItems(function (items) {
         that.data = items;
-        console.log(items);
+        //console.log(items);
     })
 }
 

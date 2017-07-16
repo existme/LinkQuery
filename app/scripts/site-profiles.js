@@ -52,11 +52,11 @@ var vk_pr_people = new SiteRule(vk_pr, "People-Rules", "qtip-dark");
 
 vk_pr_people.closest = ".feed_friend_image, .feed_friend_name, .explain, .friends_bigph_wrap, .friends_field," +
     " .wk_likes_liker_row.inl_bl, .fl_l.mv_thumb, .reply_image, .people_cell, .name, .mem_link";
-vk_pr_people.hasClass = ".right_list_title,.friends_common_thumb,.fans_fan_ph";
-vk_pr_people.prevHasClass = "fl_r reply_actions_wrap ";
+vk_pr_people.hasClass = ".feedback_group_photo,.friends_find_user_name,.right_list_title,.friends_common_thumb,.fans_fan_ph";
+vk_pr_people.prevHasClass = "fl_r reply_actions_wrap";
 
 vk_pr_people.ruleData = {
-    "Number of videos": ["#profile_videos a .header_count", "text","color:red"],
+    "#vids": ["#profile_videos a .header_count", "text","color:red"],
     "Status:": ["#friend_status span","text","color:yellow"],
     "fans:":[".counts_module a[href^='#'] .count","text","color:green"]
 };
@@ -67,16 +67,16 @@ vk_pr_pages.hasClass = ".page_group_name,.fans_idol_lnk";
 vk_pr_pages.prevHasClass = "REZA";
 
 vk_pr_pages.ruleData = {
-  "Profile # of videos": ["#profile_videos a .header_count", "text","color:red"],
+  "P#vids": ["#profile_videos a .header_count", "text","color:red"],
   // This is twice checked and if the second one exist will override the first one
-  "Page # of videos": ["#group_videos .header_count", "text","color:red"],
-  "Page # of videos": [".video_module .header_count", "text","color:red"],
-  "Page # of photos": [".photos_module .header_count", "text","color:orange"],
+  "#vids": ["#group_videos .header_count", "text","color:red"],
+  "#vids": [".video_module .header_count", "text","color:red"],
+  "#phots": [".photos_module .header_count", "text","color:orange"],
   "Status": ["#join_button", "bool", "subscribe to this page","color:yellow"],
-  "Private community": [".group_like_enter_desc", "text","color:purple"],
-  "Subscription": ["#page_actions .page_actions_info", "text","color:black"],
+  "Private": [".group_like_enter_desc", "text","color:purple"],
+  "Subscr": ["#page_actions .page_actions_info", "text","color:black"],
   "info": [".page_current_info", "text","color:gray"],
-  "Description": [".page_description", "text","color:gray"],
+  "Desc": [".page_description", "text","color:gray"],
   // This is twice checked and if the second one exist will override the first one
   "URL":[".wall_fixed .post_image","href","href","color:black"],
   "URL":["#page_wall_posts .post_image","href","href","color:black"]

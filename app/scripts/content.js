@@ -124,8 +124,7 @@ extractor.prototype.on_mousemove = function (scope) {
 
                 // Mouse In
                 if (that.prevHRef != hRef) {
-                    console.log("Using rule [" + siteRule.ruleName + "]");
-
+                    //console.log("Using rule [" + siteRule.ruleName + "]");
                     //console.log(srcElement, "*", prevDOM);
                     that.doMouseOut();
                     that.doMouseIn(anchor, hRef, siteRule);
@@ -166,7 +165,8 @@ extractor.prototype.message_loop = function (msg, sender, sendResponse) {
         var links = new Array;
         // info:
         // Start processing elements which has specific classes
-        $(".feed_friend_name,.explain,.feed_explain_list,.friends_field,.fans_idol_name,.people_results").find('a[href]').each(
+        // This is better to include the class for container which has a series of anchors
+        $(".feed_added_friends_wrap,.friends_recom_list,.feed_friend_name,.explain,.feed_explain_list,.friends_field,.fans_idol_name,.people_results").find('a[href]').each(
             function (index) {
                 var anchorElement = this;
                 var findRes = extractorObj.findRuleAndAnchor(extractorObj.site.rules, anchorElement);
@@ -178,6 +178,7 @@ extractor.prototype.message_loop = function (msg, sender, sendResponse) {
         );
 
         var max = links.length;
+        console.log("matched "+max+" elements.");
         var queueCount = 0;
         for (var index = 0; index < max; index++) {
             var anchor = links[index].anchorElement;
@@ -188,7 +189,7 @@ extractor.prototype.message_loop = function (msg, sender, sendResponse) {
                 showResult(links[index].anchorElement, true, val.txt);
             }
             else {
-                console.log(anchor);
+                //console.log(anchor);
                 setTimeout(extractorObj.ProcessHTMLLink, queueCount * 3000, this.db, extractorObj, links[index].findRes, links[index].anchorElement, index + 1, max);
                 queueCount++;
             }
@@ -196,6 +197,7 @@ extractor.prototype.message_loop = function (msg, sender, sendResponse) {
         }
     }
     console.log(msg, sender);
+    console.log("reza");
     //alert(sender);
     sendResponse();
 };
@@ -236,7 +238,7 @@ extractor.prototype.ProcessHTMLLink = function (db, extractorObject, ret, anchor
 }
 function showResult(anchoreElement, valid, content) {
     if (valid) {
-        $(anchoreElement).append("<br><p style='color:red'>" + content + "</p>");
+        $(anchoreElement).append("<br><p style='background-color:aliceblue;white-space:normal;border:1px solid;'>" + content + "</p>");
         $(anchoreElement).parents('.fans_idol_row').append("<p style='color:red'>" + content + "</p>");
     }
     else {
@@ -271,7 +273,6 @@ extractor.prototype.extractDataObject = function (ajaxPage, siteRule) {
         var val = siteRule.ruleData[key];
         var res = ajaxPage.find(val[0]);
         var style = val[2];
-        console.log(res);
         if (res.length > 0) {
             result.valid = true;
             var out = "";
@@ -300,7 +301,6 @@ extractor.prototype.extractDataObject = function (ajaxPage, siteRule) {
             result.nValue = this.parsInt(result.content);
         }
     }
-
     return result;
 };
 
